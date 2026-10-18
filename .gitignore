@@ -1,0 +1,23 @@
+# Python byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Streamlit temporary / local files
+.streamlit/
+*.log
+
+# Vector databases / Local downloaded weights caches (if cached locally)
+*.faiss
+*.index
+
+# Operating System specific files
+.DS_Store
+Thumbs.db
+desktop.ini
