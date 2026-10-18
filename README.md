@@ -12,7 +12,7 @@ The system retrieves semantically relevant passages, generates precise context-g
 
 ---
 
-## 📸 Application Preview
+## 📸 Application Showcase
 
 ![RAG Assistant Interface](assets/screenshots/rag_demo_ui.png)
 
@@ -30,7 +30,7 @@ This application addresses these issues through an end-to-end RAG architecture:
 - Retrieves top matching passages using dense vector embeddings and cosine similarity.
 - Constrains the generator to answer **strictly using retrieved facts**.
 - Flags unsupported questions instead of hallucinating.
-- Emits clickable/visible page citations.
+- Emits clear, verified page citations.
 
 ---
 
@@ -116,13 +116,13 @@ Technical-documentation-assistant/
 ├── .gitignore                 # Clean repository exclusions
 ├── assets/
 │   └── screenshots/
-│       └── rag_demo_ui.png    # Dashboard preview screenshot
+│       └── rag_demo_ui.png    # Dashboard preview showcase screenshot
 └── README.md                  # Comprehensive documentation
 ```
 
 ---
 
-## 💻 Hardware Requirements & Limitations
+## 💻 Hardware Requirements & Notebook Environment
 
 ### Local Hardware Requirements:
 - **Processor:** Any modern dual-core or quad-core CPU (Intel Core i3/i5/i7/i9, AMD Ryzen, or Apple Silicon).
@@ -130,7 +130,7 @@ Technical-documentation-assistant/
 - **Disk Space:** ~2.5 GB free disk space for PyTorch and cached Hugging Face model weights.
 - **GPU:** Optional. The entire pipeline is optimized to run smoothly on standard CPUs.
 
-### Free Notebook Alternatives (Google Colab / Kaggle):
+### Free Notebook Setup (Google Colab / Kaggle):
 If running on an ultra-light laptop or Chromebook:
 1. Open a free notebook on [Google Colab](https://colab.research.google.com/).
 2. Select runtime: **Python 3 with free T4 GPU** (or standard CPU).
@@ -200,16 +200,7 @@ The project was validated using both automated scripts and real multi-page techn
 
 - **Hallucination Notice:** Retrieval-Augmented Generation significantly reduces hallucination by bounding the model to retrieved text snippets, but it **does not completely eliminate errors**. Users must inspect cited page numbers for mission-critical specifications.
 - **Scanned Documents:** Standard PyMuPDF parses selectable text. Scanned images or photos of documents require an external OCR engine (such as Tesseract OCR or EasyOCR).
-- **Complex Tables:** Multi-column tables or nested matrices can benefit from vision-language parsing (e.g., LayoutLM or Table-Transformer).
-
----
-
-## 🔮 Future Improvements
-
-- [ ] Add Tesseract OCR integration for automated fallback on scanned PDFs.
-- [ ] Add conversation history memory for multi-turn conversational follow-ups.
-- [ ] Support multi-document cross-comparison.
-- [ ] Implement re-ranking (Cross-Encoders) to further boost top-3 retrieval precision.
+- **Complex Tables:** Multi-column tables or nested matrices can benefit from specialized vision-language parsing.
 
 ---
 

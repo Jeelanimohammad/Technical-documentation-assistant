@@ -2,15 +2,7 @@
 app.py
 ======
 Streamlit Web Application for Technical Documentation Assistant with Source References.
-
-Features:
-- Responsive, modern UI with clear status indicators and dark/light compatibility.
-- Technical PDF upload and live processing telemetry.
-- PyMuPDF text extraction with scanned PDF detection.
-- Sentence Transformers embeddings & FAISS similarity search.
-- Open-source Flan-T5 local inference with anti-hallucination guardrails.
-- Page-by-page source provenance viewer with similarity scores.
-- Safety disclaimers on Generative AI and hallucination risks.
+Features a modern, high-contrast, responsive UI with glassmorphism touches and clear attribution.
 """
 
 import os
@@ -22,47 +14,101 @@ from answer_generator import AnswerGenerator
 # Page configuration
 st.set_page_config(
     page_title="Technical Documentation Assistant",
-    page_icon="📚",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom Styling for polished UI
+# Custom High-End Styling
 st.markdown("""
 <style>
-    .main-title {
-        font-size: 2.2rem;
-        font-weight: 700;
-        color: #1E3A8A;
-        margin-bottom: 0.2rem;
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Plus Jakarta Sans', sans-serif;
     }
-    .sub-title {
+    
+    .hero-container {
+        background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #1E3A8A 100%);
+        padding: 2.2rem 2.5rem;
+        border-radius: 16px;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 25px -5px rgba(30, 27, 75, 0.25);
+    }
+    .hero-title {
+        font-size: 2.3rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.4rem;
+        color: #FFFFFF;
+    }
+    .hero-subtitle {
         font-size: 1.05rem;
-        color: #4B5563;
-        margin-bottom: 1.5rem;
+        color: #C7D2FE;
+        font-weight: 400;
+        line-height: 1.5;
     }
-    .source-box {
-        background-color: #F8FAFC;
-        border-left: 4px solid #3B82F6;
-        padding: 0.8rem 1.2rem;
-        border-radius: 6px;
-        margin-bottom: 0.8rem;
+    .status-card {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 1.2rem;
+        margin-bottom: 1.2rem;
+    }
+    .answer-card {
+        background: #FFFFFF;
+        border-radius: 12px;
+        border: 1px solid #E0E7FF;
+        border-left: 6px solid #4F46E5;
+        padding: 1.4rem 1.6rem;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
     .badge-page {
-        background-color: #DBEAFE;
-        color: #1D4ED8;
-        padding: 0.2rem 0.6rem;
-        border-radius: 12px;
+        background-color: #EEF2FF;
+        color: #4338CA;
+        padding: 0.35rem 0.75rem;
+        border-radius: 9999px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        border: 1px solid #C7D2FE;
+        display: inline-block;
+    }
+    .badge-score {
+        background-color: #ECFDF5;
+        color: #065F46;
+        padding: 0.35rem 0.75rem;
+        border-radius: 9999px;
         font-weight: 600;
         font-size: 0.85rem;
+        border: 1px solid #A7F3D0;
+        display: inline-block;
+        margin-left: 0.4rem;
     }
-    .badge-sim {
-        background-color: #E0E7FF;
-        color: #4338CA;
-        padding: 0.2rem 0.6rem;
-        border-radius: 12px;
-        font-size: 0.85rem;
-        margin-left: 0.5rem;
+    .source-passage-box {
+        background-color: #F8FAFC;
+        border-left: 4px solid #6366F1;
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 0.8rem;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #334155;
+    }
+    .stButton>button {
+        background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 0.6rem 1.4rem;
+        transition: all 0.2s ease-in-out;
+    }
+    .stButton>button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -93,7 +139,7 @@ if "chat_history" not in st.session_state:
 
 # --- Sidebar ---
 with st.sidebar:
-    st.title("⚙️ System Control")
+    st.markdown("## ⚙️ Control Panel")
     st.markdown("### Document Ingestion")
 
     uploaded_file = st.file_uploader(
@@ -104,7 +150,6 @@ with st.sidebar:
 
     if uploaded_file is not None:
         if st.session_state.current_file != uploaded_file.name:
-            # Process newly uploaded file
             with st.spinner("Extracting text and building vector index..."):
                 file_bytes = uploaded_file.read()
                 extraction = st.session_state.processor.extract_text_from_pdf(file_bytes, uploaded_file.name)
@@ -131,18 +176,20 @@ with st.sidebar:
                         st.session_state.indexed_chunks = num_chunks
                         st.session_state.page_count = extraction["total_pages"]
                         st.session_state.chat_history = []
-                        st.success(f"✅ Processed {extraction['total_pages']} pages into {num_chunks} searchable chunks!")
+                        st.success(f"✅ Indexed {extraction['total_pages']} pages into {num_chunks} searchable chunks!")
 
     if st.session_state.current_file:
         st.markdown("---")
         st.markdown("### 📄 Active Document")
-        st.info(
-            f"**File:** `{st.session_state.current_file}`\n\n"
-            f"**Total Pages:** `{st.session_state.page_count}`\n\n"
-            f"**Indexed Chunks:** `{st.session_state.indexed_chunks}`"
-        )
+        st.markdown(f"""
+        <div class="status-card">
+            <strong>File:</strong> <code>{st.session_state.current_file}</code><br>
+            <strong>Pages:</strong> {st.session_state.page_count}<br>
+            <strong>Indexed Chunks:</strong> {st.session_state.indexed_chunks}
+        </div>
+        """, unsafe_allow_html=True)
 
-        if st.button("🗑️ Clear Active Document"):
+        if st.button("🗑️ Clear Active Document", use_container_width=True):
             st.session_state.retriever = None
             st.session_state.current_file = None
             st.session_state.indexed_chunks = 0
@@ -153,22 +200,23 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### 🛡️ Architecture & Guardrails")
     st.markdown(
-        "- **Parser:** PyMuPDF (`fitz`)\n"
-        "- **Embeddings:** `all-MiniLM-L6-v2`\n"
+        "- **Parser:** PyMuPDF (`pymupdf`)\n"
+        "- **Embeddings:** `all-MiniLM-L6-v2` (384-dim)\n"
         "- **Vector DB:** FAISS CPU (Flat Inner Product / Cosine)\n"
-        "- **Generator:** HuggingFace `google/flan-t5-base`\n"
-        "- **API Costs:** **$0.00** (100% Free & Local)"
+        "- **QA Generator:** HuggingFace `google/flan-t5-base`\n"
+        "- **Model Cost:** **$0.00** (100% Free & Open-Source)"
     )
 
 
 # --- Main Dashboard ---
-st.markdown('<div class="main-title">📚 Technical Documentation Assistant</div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="sub-title">Retrieval-Augmented Generation (RAG) system with strict source references & page attribution</div>',
-    unsafe_allow_html=True
-)
+st.markdown("""
+<div class="hero-container">
+    <div class="hero-title">⚡ Technical Documentation Assistant</div>
+    <div class="hero-subtitle">Production-grade Retrieval-Augmented Generation (RAG) system with strict source references, exact page attribution, and anti-hallucination guardrails.</div>
+</div>
+""", unsafe_allow_html=True)
 
-# Crucial RAG Disclaimer required by project specifications
+# Generative AI Disclaimer
 st.warning(
     "⚠️ **Generative AI Notice:** Retrieval-Augmented Generation (RAG) significantly reduces false assertions "
     "by grounding responses in source documents, but it **does not completely eliminate hallucinations**. "
@@ -193,21 +241,17 @@ else:
             st.warning("⚠️ Please enter a question before clicking Ask.")
         else:
             with st.spinner("Retrieving relevant passages and synthesizing verified answer..."):
-                # 1. Retrieve passages from FAISS
                 retrieved_chunks = st.session_state.retriever.retrieve(
                     user_question,
                     top_k=3,
                     min_similarity_threshold=0.25
                 )
 
-                # 2. Instantiate generator if needed
                 if st.session_state.generator is None:
                     st.session_state.generator = AnswerGenerator()
 
-                # 3. Generate context-grounded answer
                 result = st.session_state.generator.generate_answer(user_question, retrieved_chunks)
 
-                # Store in history
                 st.session_state.chat_history.insert(0, {
                     "question": user_question,
                     "answer": result["answer"],
@@ -222,12 +266,22 @@ else:
 
         for idx, entry in enumerate(st.session_state.chat_history):
             with st.container():
-                st.markdown(f"#### Q: {entry['question']}")
+                st.markdown(f"#### ❓ {entry['question']}")
 
                 if entry["is_supported"]:
-                    st.success(f"**Answer:** {entry['answer']}")
+                    st.markdown(f"""
+                    <div class="answer-card">
+                        <strong style="color: #4F46E5; font-size: 1.1rem;">Verified Answer:</strong><br>
+                        <p style="font-size: 1.05rem; margin-top: 0.5rem; line-height: 1.6; color: #1E293B;">{entry['answer']}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
                 else:
-                    st.error(f"**Answer:** {entry['answer']}")
+                    st.markdown(f"""
+                    <div class="answer-card" style="border-left-color: #EF4444;">
+                        <strong style="color: #DC2626; font-size: 1.1rem;">Context Status:</strong><br>
+                        <p style="font-size: 1.05rem; margin-top: 0.5rem; line-height: 1.6; color: #7F1D1D;">{entry['answer']}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
 
                 # Source references section
                 if entry["sources"]:
@@ -237,7 +291,7 @@ else:
                         with cols[c_idx]:
                             st.markdown(
                                 f"<span class='badge-page'>📄 Page {src['page_number']}</span> "
-                                f"<span class='badge-sim'>Score: {src.get('similarity_score', 'N/A')}</span>",
+                                f"<span class='badge-score'>Similarity: {src.get('similarity_score', 'N/A')}</span>",
                                 unsafe_allow_html=True
                             )
                             st.caption(f"Source: `{src['source_file']}`")
@@ -247,8 +301,8 @@ else:
                     with st.expander(f"🔍 Inspect Supporting Passages for Query #{len(st.session_state.chat_history) - idx}"):
                         for p_idx, chunk in enumerate(entry["passages"], 1):
                             st.markdown(
-                                f"<div class='source-box'>"
-                                f"<strong>Passage {p_idx} (Page {chunk['page_number']} | Similarity: {chunk.get('similarity_score', 'N/A')}):</strong><br>"
+                                f"<div class='source-passage-box'>"
+                                f"<strong>Passage {p_idx} (Page {chunk['page_number']} | Relevance: {chunk.get('similarity_score', 'N/A')}):</strong><br>"
                                 f"<em>\"{chunk['text']}\"</em>"
                                 f"</div>",
                                 unsafe_allow_html=True
